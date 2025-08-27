@@ -9,6 +9,7 @@ function Page() {
       <Button variant="solid" color="warning">
         Click Me
       </Button>
+      <h1>hy i am mube</h1>
     </div>
   );
 }
