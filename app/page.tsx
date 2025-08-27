@@ -10,6 +10,7 @@ function Page() {
         Click Me
       </Button>
       <h1>hy i am mube</h1>
+      <h1>hy i am mube</h1>
     </div>
   );
 }
