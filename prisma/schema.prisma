@@ -13,3 +13,113 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  admin
+  manager
+  secretary
+}
+
+enum paymentStatus {
+  paid
+  unpaid
+}
+
+model user {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  phone     String   @unique
+  email     String   @unique
+  role      Role
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model candidate {
+  id              String    @id @default(cuid())
+  branchName      String
+  passportNumber  String    @unique
+  fullName        String
+  phoneNumber     String
+  cocType1        String
+  cocType2        String?
+  birthDate       DateTime
+  passportPhoto   String?
+  candidatePhoto  String?
+  summary         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  process         process[]
+  expense         expense[]
+  activePartnerId String?
+  activePartner   partner?  @relation("ActivePartner", fields: [activePartnerId], references: [id])
+  historyPartners partner[] @relation("CandidateHistory")
+  income          income[]
+}
+
+model partner {
+  id               String      @id @default(uuid())
+  name             String
+  location         String
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  activeCandidates candidate[] @relation("ActivePartner")
+  candidateHistory candidate[] @relation("CandidateHistory")
+
+  expense expense[]
+  income  income[]
+}
+
+model processName {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  process   process[]
+}
+
+model process {
+  id            String      @id @default(uuid())
+  candidateId   String
+  processNameId String
+  status        String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  candidate     candidate   @relation(fields: [candidateId], references: [id])
+  processName   processName @relation(fields: [processNameId], references: [id])
+}
+
+model income {
+  id          String        @id @default(uuid())
+  candidateId String?
+  partnerId   String?
+  source      String
+  reason      String?
+  amount      Float
+  status      paymentStatus @default(unpaid)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  candidate   candidate?    @relation(fields: [candidateId], references: [id])
+  partner     partner?      @relation(fields: [partnerId], references: [id])
+}
+
+enum ExpenseStatus {
+  onprogress
+  done
+}
+
+model expense {
+  id          String        @id @default(uuid())
+  date        DateTime
+  amount      Float
+  source      String
+  reason      String?
+  candidateId String?
+  partnerId   String?
+  status      ExpenseStatus
+  candidate   candidate?    @relation(fields: [candidateId], references: [id])
+  partner     partner?      @relation(fields: [partnerId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
